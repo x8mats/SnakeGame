@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace SnakeGame.Engine
 {
-    internal class BaseGameState
+    public abstract class BaseGameState
     {
+        //Обновление логики состояния
+        public abstract void Update(float deltaTime);
+
+        //Сброс состояния к начальному
+        public abstract void Reset();
     }
 }

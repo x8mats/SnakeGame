@@ -6,7 +6,46 @@ using System.Threading.Tasks;
 
 namespace SnakeGame.Input
 {
-    internal class ConsoleInput
+    // Интерфейс-слушатель нажатий стрелок
+    // Реализуется любым классом, который хочет реагировать на ввод.
+    public interface IArrowListener
     {
+        void OnArrowUp();
+        void OnArrowDown();
+        void OnArrowLeft();
+        void OnArrowRight();
+    }
+
+    // Класс считывания ввода с консоли.
+    // Хранит список подписчиков и оповещает их при нажатии стрелок  или wasd
+    public class ConsoleInput
+    {
+        private readonly List<IArrowListener> _arrowListeners = new();
+
+        // Добавляет слушателя в список подписчиков.
+        public void Subscribe(IArrowListener listener)
+        {
+            _arrowListeners.Add(listener);
+        }
+
+        // Считывает все накопленные нажатия и оповещает подписчиков и не останавливает игровой цикл.
+        public void Update()
+        {
+            while (Console.KeyAvailable) //покуда есть нажатие на клвишу в буфере
+            {
+                var key = Console.ReadKey(intercept: true).Key; //считывание без вывода
+
+                foreach (var listener in _arrowListeners)//оповещение
+                {
+                    switch (key)
+                    {
+                        case ConsoleKey.UpArrow or ConsoleKey.W: listener.OnArrowUp(); break;
+                        case ConsoleKey.DownArrow or ConsoleKey.S: listener.OnArrowDown(); break;
+                        case ConsoleKey.LeftArrow or ConsoleKey.A: listener.OnArrowLeft(); break;
+                        case ConsoleKey.RightArrow or ConsoleKey.D: listener.OnArrowRight(); break;
+                    }
+                }
+            }
+        }
     }
 }
