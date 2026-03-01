@@ -53,25 +53,26 @@ namespace SnakeGame.States
         {
             return _currentDir switch
             {
-                SnakeDir.Up => new Cell(origin.X, origin.Y + 1),
-                SnakeDir.Down => new Cell(origin.X, origin.Y - 1),
+                SnakeDir.Up => new Cell(origin.X, origin.Y - 1),
+                SnakeDir.Down => new Cell(origin.X, origin.Y + 1),
                 SnakeDir.Left => new Cell(origin.X - 1, origin.Y),
                 SnakeDir.Right => new Cell(origin.X + 1, origin.Y),
                 _ => origin
             };
         }
 
-        
+
         // Сбрасывает состояние: очищает тело, ставит голову в (0,0), направление — вправо
         public override void Reset()
         {
             Body.Clear();
             _currentDir = SnakeDir.Right;
-            Body.Add(new Cell(0, 0));
+            // Старт примерно в центре консоли, чтобы было место для движения в любую сторону, потому что  если в начале игры уйти в потолок то игр а крашитсся сразу
+            Body.Add(new Cell(Console.WindowWidth / 2, Console.WindowHeight / 2));
             _timeToMove = 0f;
         }
 
-        
+
         // Обновляет позицию головы раз в (1 / MoveSpeed) секунд
         public override void Update(float deltaTime)
         {
@@ -90,7 +91,21 @@ namespace SnakeGame.States
             Body.Insert(0, nextCell);
 
             //Console.WriteLine($"X: {Body[0].X,5} | Y: {Body[0].Y,5}"); //вывод координат неактуален
+
+            // Если следующая клетка за границей — перезапускаем игру
+            if (IsOutOfBounds(nextCell))
+            {
+                Reset();
+                return;
+            }
         }
+
+        // Возвращает true если клетка вышла за пределы окна консоли
+        private static bool IsOutOfBounds(Cell cell) =>
+            cell.X < 0 ||
+            cell.Y < 0 ||
+            cell.X >= Console.WindowWidth ||
+            cell.Y >= Console.WindowHeight;
 
         private static bool IsOpposite(SnakeDir a, SnakeDir b) =>
             (a == SnakeDir.Up && b == SnakeDir.Down) ||
