@@ -89,7 +89,7 @@ namespace SnakeGame.States
             Body.RemoveAt(Body.Count - 1);
             Body.Insert(0, nextCell);
 
-            Console.WriteLine($"X: {Body[0].X,5} | Y: {Body[0].Y,5}");
+            //Console.WriteLine($"X: {Body[0].X,5} | Y: {Body[0].Y,5}"); //вывод координат неактуален
         }
 
         private static bool IsOpposite(SnakeDir a, SnakeDir b) =>
