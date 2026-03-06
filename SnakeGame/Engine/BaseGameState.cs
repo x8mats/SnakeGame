@@ -8,7 +8,7 @@ namespace SnakeGame.Engine
 {
     public abstract class BaseGameState
     {
-        //Обновление логики состояния
+        //Обновление логики состояния. deltaTime — время с последнего кадра в секундах
         public abstract void Update(float deltaTime);
 
         //Сброс состояния к начальному

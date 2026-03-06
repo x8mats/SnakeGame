@@ -7,8 +7,11 @@ using System.Threading.Tasks;
 
 namespace SnakeGame.Engine
 {
-    // Реализует IArrowListener те получает события от ConsoleInput.
-    // Конкретные классы логики переопределяют реакции на стрелки
+    /// <summary>
+    /// Базовый абстрактный класс игровой логики.
+    /// Реализует IArrowListener — получает события от ConsoleInput.
+    /// Конкретные классы логики переопределяют реакции на стрелки.
+    /// </summary>
     public abstract class BaseGameLogic : IArrowListener
     {
         // Реализации по умолчанию — конкретный класс переопределяет нужные
@@ -17,7 +20,9 @@ namespace SnakeGame.Engine
         public virtual void OnArrowLeft() { }
         public virtual void OnArrowRight() { }
 
-        // Подписывает этот экземпляр на события ConsoleInput
+        /// <summary>
+        /// Подписывает этот экземпляр на события ConsoleInput.
+        /// </summary>
         public void InitializeInput(ConsoleInput input)
         {
             input.Subscribe(this);

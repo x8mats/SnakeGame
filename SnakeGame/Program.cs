@@ -5,8 +5,8 @@ class Program
 {
     static void Main()
     {
-        Console.CursorVisible = false; //скрыть курср
-        Console.WriteLine("Управление: стрелкии или WASD\n");
+        Console.CursorVisible = false;
+        Console.WriteLine("=== Snake | Управление: стрелки / WASD ===\n");
 
         var gameLogic = new SnakeGameLogic();
         var input = new ConsoleInput();
@@ -24,7 +24,7 @@ class Program
             var frameStartTime = DateTime.UtcNow;
             float deltaTime = (float)(frameStartTime - lastFrameTime).TotalSeconds;
 
-            gameLogic.Update(deltaTime);//обнвлене=ие логики
+            gameLogic.Update(deltaTime);
 
             lastFrameTime = frameStartTime;
         }

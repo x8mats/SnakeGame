@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 
 namespace SnakeGame.States
 {
-    // Направления движения змейки.
+    /// <summary>
+    /// Направления движения змейки.
+    /// </summary>
     public enum SnakeDir
     {
         Up,
@@ -15,8 +17,10 @@ namespace SnakeGame.States
         Left,
         Right
     }
-    
-    // Хранит X/Y координаты одной клетки тела змейки
+
+    /// <summary>
+    /// Хранит X/Y координаты одной клетки тела змейки.
+    /// </summary>
     public struct Cell
     {
         public int X;
@@ -29,51 +33,58 @@ namespace SnakeGame.States
         }
     }
 
-    
-    // Состояние игровой сессии змейки, хранит тело, направление, обновляет позицию головы с заданной скоростью
+    /// <summary>
+    /// Состояние игровой сессии змейки:
+    /// хранит тело, направление, обновляет позицию головы с заданной скоростью.
+    /// </summary>
     public class SnakeGameplayState : BaseGameState
     {
-        // Константа количество шагов в секунду
+        // Константа: количество шагов в секунду
         private const float MoveSpeed = 5f;
+
         public List<Cell> Body { get; } = new();
         private SnakeDir _currentDir;
         private float _timeToMove;
 
-        
-        // Задаёт новое направление движения и разворот на 180° игнорируется
+        /// <summary>
+        /// Задаёт новое направление движения.
+        /// Разворот на 180° игнорируется.
+        /// </summary>
         public void SetDirection(SnakeDir dir)
         {
             if (!IsOpposite(_currentDir, dir))
                 _currentDir = dir;
         }
 
-        
-        // Возвращает клетку, смещённую на 1 шаг в направлении currentDir
+        /// <summary>
+        /// Возвращает клетку, смещённую на 1 шаг в направлении currentDir.
+        /// </summary>
         private Cell ShiftTo(Cell origin)
         {
             return _currentDir switch
             {
-                SnakeDir.Up => new Cell(origin.X, origin.Y - 1),
-                SnakeDir.Down => new Cell(origin.X, origin.Y + 1),
+                SnakeDir.Up => new Cell(origin.X, origin.Y + 1),
+                SnakeDir.Down => new Cell(origin.X, origin.Y - 1),
                 SnakeDir.Left => new Cell(origin.X - 1, origin.Y),
                 SnakeDir.Right => new Cell(origin.X + 1, origin.Y),
                 _ => origin
             };
         }
 
-
-        // Сбрасывает состояние: очищает тело, ставит голову в (0,0), направление — вправо
+        /// <summary>
+        /// Сбрасывает состояние: очищает тело, ставит голову в (0,0), направление — вправо.
+        /// </summary>
         public override void Reset()
         {
             Body.Clear();
             _currentDir = SnakeDir.Right;
-            // Старт примерно в центре консоли, чтобы было место для движения в любую сторону, потому что  если в начале игры уйти в потолок то игр а крашитсся сразу
-            Body.Add(new Cell(Console.WindowWidth / 2, Console.WindowHeight / 2));
+            Body.Add(new Cell(0, 0));
             _timeToMove = 0f;
         }
 
-
-        // Обновляет позицию головы раз в (1 / MoveSpeed) секунд
+        /// <summary>
+        /// Обновляет позицию головы раз в (1 / MoveSpeed) секунд.
+        /// </summary>
         public override void Update(float deltaTime)
         {
             _timeToMove -= deltaTime;
@@ -90,22 +101,8 @@ namespace SnakeGame.States
             Body.RemoveAt(Body.Count - 1);
             Body.Insert(0, nextCell);
 
-            //Console.WriteLine($"X: {Body[0].X,5} | Y: {Body[0].Y,5}"); //вывод координат неактуален
-
-            // Если следующая клетка за границей — перезапускаем игру
-            if (IsOutOfBounds(nextCell))
-            {
-                Reset();
-                return;
-            }
+            Console.WriteLine($"X: {Body[0].X,5} | Y: {Body[0].Y,5}");
         }
-
-        // Возвращает true если клетка вышла за пределы окна консоли
-        private static bool IsOutOfBounds(Cell cell) =>
-            cell.X < 0 ||
-            cell.Y < 0 ||
-            cell.X >= Console.WindowWidth ||
-            cell.Y >= Console.WindowHeight;
 
         private static bool IsOpposite(SnakeDir a, SnakeDir b) =>
             (a == SnakeDir.Up && b == SnakeDir.Down) ||
