@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SnakeGame.Rendering;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,5 +14,11 @@ namespace SnakeGame.Engine
 
         //Сброс состояния к начальному
         public abstract void Reset();
+
+        // Опциональный рендер, по умолчанию ничего не рисует
+        public virtual void Draw(ConsoleRenderer renderer) { }
+
+        // Состояние завершено?
+        public virtual bool IsDone() => false;
     }
 }

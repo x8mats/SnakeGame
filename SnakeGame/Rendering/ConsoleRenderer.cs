@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SnakeGame.Rendering
 {
-    internal class ConsoleRenderer
+    public class ConsoleRenderer
     {
         public int width { get; private set; }
         public int height { get; private set; }

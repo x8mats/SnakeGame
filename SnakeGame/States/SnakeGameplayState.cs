@@ -33,11 +33,27 @@ namespace SnakeGame.States
     // Состояние игровой сессии змейки, хранит тело, направление, обновляет позицию головы с заданной скоростью
     public class SnakeGameplayState : BaseGameState
     {
-        // Константа количество шагов в секунду
-        private const float MoveSpeed = 5f;
+        public int Level { get; private set; } = 1;
+        
+        public int ApplesGoal => 3 + (Level - 1) * 2;
+        
+        public int ApplesCollected { get; private set; } = 0;
+        
+        private float MoveSpeed => 3f + (Level - 1) * 1.5f;
+        
+        public Cell? Apple { get; private set; } = null;
+        
+        private readonly Random _rng = new Random();
+        
+        public bool IsGameOver { get; private set; } = false;
+
+        public bool IsLevelComplete { get; private set; } = false;
+
         public List<Cell> Body { get; } = new();
         private SnakeDir _currentDir;
         private float _timeToMove;
+
+        private int _pendingGrowth = 0;
 
         //флаг для режима с координатами
         public bool ShowCoordinates { get; set; } = false;
@@ -89,23 +105,66 @@ namespace SnakeGame.States
             };
         }
 
-
-        // Сбрасывает состояние: очищает тело, ставит голову в (0,0), направление — вправо
-        public override void Reset()
+        public void ResetGame(bool resetLevel = true)
         {
             Body.Clear();
             _currentDir = SnakeDir.Right;
-            // Старт примерно в центре консоли, чтобы было место для движения в любую сторону, потому что  если в начале игры уйти в потолок то игр а крашитсся сразу
-            //Body.Add(new Cell(Console.WindowWidth / 2, Console.WindowHeight / 2));
-            if (ShowCoordinates)
-                Body.Add(new Cell(0, 0)); //для режим координат будет старт из (0,0)
-            else
-                Body.Add(new Cell(Console.WindowWidth / 2, Console.WindowHeight / 2)); //для игрового будет центр консоли
             _timeToMove = 0f;
+            _pendingGrowth = 0;
+            IsGameOver = false;
+            IsLevelComplete = false;
+
+            if (resetLevel)
+            {
+                Level = 1;
+                ApplesCollected = 0;
+            }
+
+            if (ShowCoordinates)
+                Body.Add(new Cell(0, 0));
+            else
+                Body.Add(new Cell(Console.WindowWidth / 2, Console.WindowHeight / 2));
+
+            SpawnApple();
         }
 
+        public override void Reset() => ResetGame(resetLevel: true);
 
-        // Обновляет позицию головы раз в (1 / MoveSpeed) секунд
+        public void NextLevel()
+        {
+            Level++;
+            ApplesCollected = 0;
+            ResetGame(resetLevel: false);
+        }
+
+        private void SpawnApple()
+        {
+            int w = Console.WindowWidth;
+            int h = Console.WindowHeight;
+
+            Cell candidate;
+            int attempts = 0;
+
+            do
+            {
+                candidate = new Cell(_rng.Next(1, w - 1), _rng.Next(1, h - 2));
+                attempts++;
+            }
+            while (IsOnSnake(candidate) && attempts < 100);
+
+            Apple = candidate;
+        }
+
+        private bool IsOnSnake(Cell c)
+        {
+            foreach (var segment in Body)
+            {
+                if (segment.X == c.X && segment.Y == c.Y)
+                    return true;
+            }
+            return false;
+        }
+
         public override void Update(float deltaTime)
         {
             _timeToMove -= deltaTime;
@@ -116,34 +175,60 @@ namespace SnakeGame.States
             _timeToMove = 1f / MoveSpeed;
 
             Cell head = Body[0];
-            //Cell nextCell = ShiftTo(head);
             Cell nextCell = ShowCoordinates ? ShiftToCoords(head) : ShiftToGame(head);
 
-            // Убираем хвост, вставляем новую голову
-            Body.RemoveAt(Body.Count - 1);
-            Body.Insert(0, nextCell);
-
-            //Console.WriteLine($"X: {Body[0].X,5} | Y: {Body[0].Y,5}"); //вывод координат неактуален
-
-
-            //Вывод координат если выбран такой решим
+            // Режим координат — отдельная логика без рендера и границ
             if (ShowCoordinates)
             {
+                Body.RemoveAt(Body.Count - 1);
+                Body.Insert(0, nextCell);
                 Console.Clear();
                 Console.SetCursorPosition(0, 0);
                 Console.WriteLine($"X: {Body[0].X,5} | Y: {Body[0].Y,5}");
                 return;
             }
 
-            // Если следующая клетка за границей — перезапускаем игру
             if (IsOutOfBounds(nextCell))
             {
-                Reset();
+                IsGameOver = true;
                 return;
+            }
+
+            bool ateApple = Apple.HasValue &&
+                            nextCell.X == Apple.Value.X &&
+                            nextCell.Y == Apple.Value.Y;
+
+            if (ateApple)
+            {
+                ApplesCollected++;
+                Apple = null;
+                _pendingGrowth++;
+            }
+
+            Body.Insert(0, nextCell);
+
+            if (_pendingGrowth > 0)
+            {
+                _pendingGrowth--;
+            }
+            else
+            {
+                Body.RemoveAt(Body.Count - 1);
+            }
+
+            if (ateApple)
+            {
+                if (ApplesCollected >= ApplesGoal)
+                {
+                    IsLevelComplete = true;
+                }
+                else
+                {
+                    SpawnApple();
+                }
             }
         }
 
-        // Возвращает true если клетка вышла за пределы окна консоли
         private static bool IsOutOfBounds(Cell cell) =>
             cell.X < 0 ||
             cell.Y < 0 ||
