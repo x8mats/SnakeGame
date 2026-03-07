@@ -98,6 +98,7 @@ namespace SnakeGame.States
             //Вывод координат если выбран такой решим
             if (ShowCoordinates)
             {
+                Console.Clear();
                 Console.SetCursorPosition(0, 0);
                 Console.WriteLine($"X: {Body[0].X,5} | Y: {Body[0].Y,5}");
             }
