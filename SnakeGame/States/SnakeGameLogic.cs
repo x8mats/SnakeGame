@@ -21,6 +21,10 @@ namespace SnakeGame.States
             ConsoleColor.Green   // 1 — цвет головы змейки
         });
 
+        //хранение режима
+        private bool _coordMode = false;
+
+
         public override void OnArrowUp() => _gameplayState.SetDirection(SnakeDir.Up);
         public override void OnArrowDown() => _gameplayState.SetDirection(SnakeDir.Down);
         public override void OnArrowLeft() => _gameplayState.SetDirection(SnakeDir.Left);
@@ -29,14 +33,26 @@ namespace SnakeGame.States
         //Инициализирует состояние и запускает движение змейки и задает цвет фона
         public void GotoGameplay(bool showCoordinates = false)
         {
-            _renderer.bgColor = ConsoleColor.Black;
-            _gameplayState.ShowCoordinates = showCoordinates; // новая ф-ция для вывода коорд
+            _coordMode = showCoordinates;
+            _gameplayState.ShowCoordinates = showCoordinates;
+
+            if (!_coordMode)
+            {
+                _renderer.bgColor = ConsoleColor.Black;
+            }
+
             _gameplayState.Reset();
         }
 
         public override void Update(float deltaTime)
         {
             _gameplayState.Update(deltaTime);
+
+            if (_coordMode)
+            {
+                //режим координат без рендера
+                return;
+            }
 
             // Очищаем буфер от прошлого кадра
             _renderer.Clear();
