@@ -49,14 +49,40 @@ namespace SnakeGame.States
                 _currentDir = dir;
         }
 
-        
-        // Возвращает клетку, смещённую на 1 шаг в направлении currentDir
-        private Cell ShiftTo(Cell origin)
+
+        ////Возвращает клетку, смещённую на 1 шаг в направлении currentDir
+        //private Cell ShiftTo(Cell origin)
+        //{
+        //    return _currentDir switch
+        //    {
+        //        SnakeDir.Up => new Cell(origin.X, origin.Y - 1),
+        //        SnakeDir.Down => new Cell(origin.X, origin.Y + 1),
+        //        SnakeDir.Left => new Cell(origin.X - 1, origin.Y),
+        //        SnakeDir.Right => new Cell(origin.X + 1, origin.Y),
+        //        _ => origin
+        //    };
+        //}
+
+        //перемещение для игрового режима
+        private Cell ShiftToGame(Cell origin)
         {
             return _currentDir switch
             {
                 SnakeDir.Up => new Cell(origin.X, origin.Y - 1),
                 SnakeDir.Down => new Cell(origin.X, origin.Y + 1),
+                SnakeDir.Left => new Cell(origin.X - 1, origin.Y),
+                SnakeDir.Right => new Cell(origin.X + 1, origin.Y),
+                _ => origin
+            };
+        }
+
+        //перемещение для режима координат
+        private Cell ShiftToCoords(Cell origin)
+        {
+            return _currentDir switch
+            {
+                SnakeDir.Up => new Cell(origin.X, origin.Y + 1),
+                SnakeDir.Down => new Cell(origin.X, origin.Y - 1),
                 SnakeDir.Left => new Cell(origin.X - 1, origin.Y),
                 SnakeDir.Right => new Cell(origin.X + 1, origin.Y),
                 _ => origin
@@ -70,7 +96,11 @@ namespace SnakeGame.States
             Body.Clear();
             _currentDir = SnakeDir.Right;
             // Старт примерно в центре консоли, чтобы было место для движения в любую сторону, потому что  если в начале игры уйти в потолок то игр а крашитсся сразу
-            Body.Add(new Cell(Console.WindowWidth / 2, Console.WindowHeight / 2));
+            //Body.Add(new Cell(Console.WindowWidth / 2, Console.WindowHeight / 2));
+            if (ShowCoordinates)
+                Body.Add(new Cell(0, 0)); //для режим координат будет старт из (0,0)
+            else
+                Body.Add(new Cell(Console.WindowWidth / 2, Console.WindowHeight / 2)); //для игрового будет центр консоли
             _timeToMove = 0f;
         }
 
@@ -86,7 +116,8 @@ namespace SnakeGame.States
             _timeToMove = 1f / MoveSpeed;
 
             Cell head = Body[0];
-            Cell nextCell = ShiftTo(head);
+            //Cell nextCell = ShiftTo(head);
+            Cell nextCell = ShowCoordinates ? ShiftToCoords(head) : ShiftToGame(head);
 
             // Убираем хвост, вставляем новую голову
             Body.RemoveAt(Body.Count - 1);
@@ -101,6 +132,7 @@ namespace SnakeGame.States
                 Console.Clear();
                 Console.SetCursorPosition(0, 0);
                 Console.WriteLine($"X: {Body[0].X,5} | Y: {Body[0].Y,5}");
+                return;
             }
 
             // Если следующая клетка за границей — перезапускаем игру
