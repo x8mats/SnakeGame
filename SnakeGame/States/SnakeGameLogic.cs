@@ -27,9 +27,10 @@ namespace SnakeGame.States
         public override void OnArrowRight() => _gameplayState.SetDirection(SnakeDir.Right);
 
         //Инициализирует состояние и запускает движение змейки и задает цвет фона
-        public void GotoGameplay()
+        public void GotoGameplay(bool showCoordinates = false)
         {
             _renderer.bgColor = ConsoleColor.Black;
+            _gameplayState.ShowCoordinates = showCoordinates; // новая ф-ция для вывода коорд
             _gameplayState.Reset();
         }
 

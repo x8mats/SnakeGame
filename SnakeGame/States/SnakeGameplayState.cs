@@ -39,7 +39,9 @@ namespace SnakeGame.States
         private SnakeDir _currentDir;
         private float _timeToMove;
 
-        
+        //флаг для режима с координатами
+        public bool ShowCoordinates { get; set; } = false;
+
         // Задаёт новое направление движения и разворот на 180° игнорируется
         public void SetDirection(SnakeDir dir)
         {
@@ -91,6 +93,14 @@ namespace SnakeGame.States
             Body.Insert(0, nextCell);
 
             //Console.WriteLine($"X: {Body[0].X,5} | Y: {Body[0].Y,5}"); //вывод координат неактуален
+
+
+            //Вывод координат если выбран такой решим
+            if (ShowCoordinates)
+            {
+                Console.SetCursorPosition(0, 0);
+                Console.WriteLine($"X: {Body[0].X,5} | Y: {Body[0].Y,5}");
+            }
 
             // Если следующая клетка за границей — перезапускаем игру
             if (IsOutOfBounds(nextCell))
